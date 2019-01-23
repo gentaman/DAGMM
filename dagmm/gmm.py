@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
+import sys
 
 class GMM:
     """ Gaussian Mixture Model (GMM) """
@@ -12,19 +13,19 @@ class GMM:
     def create_variables(self, n_features):
         with tf.variable_scope("GMM"):
             phi = tf.Variable(tf.zeros(shape=[self.n_comp]),
-                dtype=tf.float32, name="phi")
+                dtype=tf.float64, name="phi")
             mu = tf.Variable(tf.zeros(shape=[self.n_comp, n_features]),
-                dtype=tf.float32, name="mu")
+                dtype=tf.float64, name="mu")
             sigma = tf.Variable(tf.zeros(
                 shape=[self.n_comp, n_features, n_features]),
-                dtype=tf.float32, name="sigma")
+                dtype=tf.float64, name="sigma")
             L = tf.Variable(tf.zeros(
                 shape=[self.n_comp, n_features, n_features]),
-                dtype=tf.float32, name="L")
+                dtype=tf.float64, name="L")
 
         return phi, mu, sigma, L
 
-    def fit(self, z, gamma):
+    def fit(self, z, gamma, x, show=False):
         """ fit data to GMM model
 
         Parameters
@@ -49,9 +50,22 @@ class GMM:
 
             # Calculate a cholesky decomposition of covariance in advance
             n_features = z.shape[1]
-            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
+            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float64)) * 1e-6
+            print(type(x.shape[0]))
+            if x.shape[0] != tf.Dimension(None):
+                sess = tf.InteractiveSession()
+                with sess.as_default():
+                    print(sigma.eval())
+                    print(min_vals.eval())
+                    print(sigma.shape, min_vals.shape)
+                print('show')
+            eigh = tf.linalg.eigh(sigma + min_vals[None,:,:])
+            print(eigh)
+            # tf.print(sigma)
+            # tf.print(min_vals)
+            print(sigma)
+            print(min_vals)
             self.L = tf.cholesky(sigma + min_vals[None,:,:])
-
         self.training = False
 
     def fix_op(self):
@@ -114,9 +128,18 @@ class GMM:
             log_det_sigma = 2.0 * tf.reduce_sum(tf.log(tf.matrix_diag_part(self.L)), axis=1)
 
             # To calculate energies, use "log-sum-exp" (different from orginal paper)
+            tf.cast(v, tf.float32)
             d = z.get_shape().as_list()[1]
+            tf.cast(d, tf.float32)
+            tf.cast(self.phi, tf.float64)
+            dlog = d * tf.log(2.0 * np.pi)
+            dlog = tf.cast(dlog, tf.float64)
+            print(tf.log(self.phi[:,None]))
+            print(0.5 * (tf.reduce_sum(tf.square(v), axis=1)))
+            print(dlog)
+            print(log_det_sigma[:,None])
             logits = tf.log(self.phi[:,None]) - 0.5 * (tf.reduce_sum(tf.square(v), axis=1)
-                + d * tf.log(2.0 * np.pi) + log_det_sigma[:,None])
+                + dlog + log_det_sigma[:,None])
             energies = - tf.reduce_logsumexp(logits, axis=0)
 
         return energies

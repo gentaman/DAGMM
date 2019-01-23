@@ -110,13 +110,13 @@ class DAGMM:
 
             # Create Placeholder
             self.input = input = tf.placeholder(
-                dtype=tf.float32, shape=[None, n_features])
-            self.drop = drop = tf.placeholder(dtype=tf.float32, shape=[])
+                dtype=tf.float64, shape=[None, n_features])
+            self.drop = drop = tf.placeholder(dtype=tf.float64, shape=[])
 
             # Build graph
             z, x_dash  = self.comp_net.inference(input)
             gamma = self.est_net.inference(z, drop)
-            self.gmm.fit(z, gamma)
+            self.gmm.fit(z, gamma, input)
             energy = self.gmm.energy(z)
 
             self.x_dash = x_dash
@@ -142,6 +142,7 @@ class DAGMM:
             idx = np.arange(x.shape[0])
             np.random.shuffle(idx)
 
+            show_flag=True
             for epoch in range(self.epoch_size):
                 for batch in range(n_batch):
                     i_start = batch * self.minibatch_size

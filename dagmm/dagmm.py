@@ -110,8 +110,8 @@ class DAGMM:
 
             # Create Placeholder
             self.input = input = tf.placeholder(
-                dtype=tf.float64, shape=[None, n_features])
-            self.drop = drop = tf.placeholder(dtype=tf.float64, shape=[])
+                dtype=tf.float32, shape=[None, n_features])
+            self.drop = drop = tf.placeholder(dtype=tf.float32, shape=[])
 
             # Build graph
             z, x_dash  = self.comp_net.inference(input)

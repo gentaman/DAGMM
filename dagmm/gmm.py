@@ -13,15 +13,15 @@ class GMM:
     def create_variables(self, n_features):
         with tf.variable_scope("GMM"):
             phi = tf.Variable(tf.zeros(shape=[self.n_comp]),
-                dtype=tf.float64, name="phi")
+                dtype=tf.float32, name="phi")
             mu = tf.Variable(tf.zeros(shape=[self.n_comp, n_features]),
-                dtype=tf.float64, name="mu")
+                dtype=tf.float32, name="mu")
             sigma = tf.Variable(tf.zeros(
                 shape=[self.n_comp, n_features, n_features]),
-                dtype=tf.float64, name="sigma")
+                dtype=tf.float32, name="sigma")
             L = tf.Variable(tf.zeros(
                 shape=[self.n_comp, n_features, n_features]),
-                dtype=tf.float64, name="L")
+                dtype=tf.float32, name="L")
 
         return phi, mu, sigma, L
 
@@ -50,7 +50,7 @@ class GMM:
 
             # Calculate a cholesky decomposition of covariance in advance
             n_features = z.shape[1]
-            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float64)) * 1e-6
+            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
             print(type(x.shape[0]))
             if x.shape[0] != tf.Dimension(None):
                 sess = tf.InteractiveSession()
@@ -131,9 +131,9 @@ class GMM:
             tf.cast(v, tf.float32)
             d = z.get_shape().as_list()[1]
             tf.cast(d, tf.float32)
-            tf.cast(self.phi, tf.float64)
+            tf.cast(self.phi, tf.float32)
             dlog = d * tf.log(2.0 * np.pi)
-            dlog = tf.cast(dlog, tf.float64)
+            dlog = tf.cast(dlog, tf.float32)
             print(tf.log(self.phi[:,None]))
             print(0.5 * (tf.reduce_sum(tf.square(v), axis=1)))
             print(dlog)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
+from tensorflow.contrib import linalg
 import sys
 
 class GMM:
@@ -59,8 +60,8 @@ class GMM:
                     print(min_vals.eval())
                     print(sigma.shape, min_vals.shape)
                 print('show')
-            eigh = tf.linalg.eigh(sigma + min_vals[None,:,:])
-            print(eigh)
+            # eigh = linalg.eigh(sigma + min_vals[None,:,:])
+            # print(eigh)
             # tf.print(sigma)
             # tf.print(min_vals)
             print(sigma)

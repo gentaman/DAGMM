@@ -10,6 +10,8 @@ from dagmm.gmm import GMM
 from os import makedirs
 from os.path import exists, join
 
+from tensorflow.python import debug as tf_debug
+
 class DAGMM:
     """ Deep Autoencoding Gaussian Mixture Model.
 
@@ -115,6 +117,7 @@ class DAGMM:
 
             # Build graph
             z, x_dash  = self.comp_net.inference(input)
+            print(z, drop)
             gamma = self.est_net.inference(z, drop)
             self.gmm.fit(z, gamma, input)
             energy = self.gmm.energy(z)
@@ -134,8 +137,14 @@ class DAGMM:
 
             # Create tensorflow session and initilize
             init = tf.global_variables_initializer()
-
-            self.sess = tf.Session(graph=graph)
+            config = tf.ConfigProto(
+                gpu_options=tf.GPUOptions(
+                    visible_device_list="0", # specify GPU number
+                    allow_growth=True
+                )
+            )
+            self.sess = tf.Session(graph=graph, config=config)
+            # self.sess = tf_debug.LocalDLIDebugWrapperSession(tf.Session(graph=graph))
             self.sess.run(init)
 
             # Training

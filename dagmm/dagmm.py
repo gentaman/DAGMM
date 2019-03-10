@@ -119,7 +119,7 @@ class DAGMM:
             z, x_dash  = self.comp_net.inference(input)
             print(z, drop)
             gamma = self.est_net.inference(z, drop)
-            self.gmm.fit(z, gamma, input)
+            gmm_sigma = self.gmm.fit(z, gamma, input)
             energy = self.gmm.energy(z)
 
             self.x_dash = x_dash
@@ -157,7 +157,12 @@ class DAGMM:
                     i_start = batch * self.minibatch_size
                     i_end = (batch + 1) * self.minibatch_size
                     x_batch = x[idx[i_start:i_end]]
-
+                    print(x_batch.shape)
+                    if epoch == 0 and batch < 10:
+                        output = self.sess.run(gmm_sigma, feed_dict={input:x_batch, drop:self.est_dropout_ratio})
+                        print(output)
+                        for i, out in enumerate(output):
+                            np.save('./sigma_data{}_{}_{}'.format(epoch, batch, i), out)
                     self.sess.run(minimizer, feed_dict={
                         input:x_batch, drop:self.est_dropout_ratio})
 

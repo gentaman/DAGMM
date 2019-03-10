@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
-from tensorflow.contrib import linalg
+from tensorflow import linalg
 import sys
 
 class GMM:
@@ -51,27 +51,15 @@ class GMM:
 
             # Calculate a cholesky decomposition of covariance in advance
             n_features = z.shape[1]
-            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
-            print(type(x.shape[0]))
-            if x.shape[0] != tf.Dimension(None):
-                sess = tf.InteractiveSession()
-                with sess.as_default():
-                    print(sigma.eval())
-                    print(min_vals.eval())
-                    print(sigma.shape, min_vals.shape)
-                print('show')
-            # eigh = linalg.eigh(sigma + min_vals[None,:,:])
-            # print(eigh)
-            # tf.print(sigma)
-            # tf.print(min_vals)
-            print(sigma)
-            print(min_vals)
-            self.L = tf.cholesky(sigma + min_vals[None,:,:])
+            # min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
+            self.min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
+            # self.L = tf.cholesky(sigma + min_vals[None,:,:])
         self.training = False
+        return self.sigma, z_centered, self.mu, gamma_sum, z, gamma
 
     def fix_op(self):
         """ return operator to fix paramters of GMM
-        Using this operator outside of this class,
+        Using this operator outside of this class,a
         you can fix current parameter to static tensor variable.
 
         After you call this method, you have to run result
@@ -115,6 +103,9 @@ class GMM:
         energy : tf.Tensor, shape (n_samples)
             calculated energies
         """
+
+        with tf.variable_scope("GMM"):
+            self.L = tf.cholesky(self.sigma + self.min_vals[None,:,:])
 
         if self.training and self.phi is None:
             self.phi, self.mu, self.sigma, self.L = self.create_variable(z.shape[1])

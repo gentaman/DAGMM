@@ -157,10 +157,10 @@ class DAGMM:
                     i_start = batch * self.minibatch_size
                     i_end = (batch + 1) * self.minibatch_size
                     x_batch = x[idx[i_start:i_end]]
-                    print(x_batch.shape)
+                    # print(x_batch.shape)
                     if epoch == 0 and batch < 10:
                         output = self.sess.run(gmm_sigma, feed_dict={input:x_batch, drop:self.est_dropout_ratio})
-                        print(output)
+                        # print(output)
                         for i, out in enumerate(output):
                             np.save('./sigma_data{}_{}_{}'.format(epoch, batch, i), out)
                     self.sess.run(minimizer, feed_dict={
